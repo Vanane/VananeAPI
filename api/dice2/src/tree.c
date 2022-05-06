@@ -3,7 +3,7 @@
 
 
 typedef struct TNode {
-	void * value;
+	int * value;
     int valueType; /* 0 = int, 1 = char, 2 = string */
 	struct TNode * left;
 	struct TNode * right;
@@ -13,7 +13,6 @@ typedef struct TNode {
 
 void printPointerValue(int * pointer, int type)
 {
-    fflush(stdout);
     if(pointer == NULL)
         printf("NULL");
     else
@@ -27,7 +26,7 @@ void printPointerValue(int * pointer, int type)
                 printf("%c", (* pointer));
             break;
             case 2:
-                printf("%s", pointer);
+                printf("%s", (char *)pointer);
             break;
             default:
             break;
@@ -65,6 +64,7 @@ void printIndent(int indent)
         printf(" ");
     }
     printf("-");
+    fflush(stdout);
 }
 
 
@@ -73,8 +73,8 @@ void printTreeR(Node * tree, int indent)
     if(tree != NULL)
     {
         printTreeR((* tree).left, (indent + 4));
-        
-        printIndent(indent);    
+
+        printIndent(indent);
         printPointerValue((* tree).value, (* tree).valueType);
         printf("\n");
 
@@ -90,6 +90,7 @@ void printTree(Node * tree)
         printTreeR(tree, 1);
     }
 }
+
 
 /*
 int main()

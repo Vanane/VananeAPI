@@ -9,7 +9,7 @@
 [dD]            yylval.literal=yytext[0];return DICEOP;
 [\(\)]          return yytext[0];
 
-[\n\r]            return NEWLINE;
+[\n\r]          return NEWLINE;
 
-.               { printf("unknown char %c", yytext[0]); }
+.               return yytext[0];
 %%

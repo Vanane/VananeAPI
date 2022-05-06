@@ -27,7 +27,7 @@ Stack * newStack(int capacity, bool verbose)
 }
 
 
-void push(Stack * stack, int * object)
+void push(Stack * stack, void * object)
 {
     if((* stack).capacity > (* stack).size)
     {

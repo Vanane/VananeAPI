@@ -1,4 +1,8 @@
-Lancer : `uvicorn main:app --reload`
+Launch server :
+uvicorn main:app --reload
+
+Compile parser :
+lex dice.l && yacc -d dice.y && gcc lex.yy.c y.tab.c -o diceParser
 
 ## Installation
 
@@ -9,5 +13,3 @@ You will need :
 -   Flex
 -   Yacc
 -   Uvicorn
-
-lex dice.l && yacc -d dice.y && gcc lex.yy.c y.tab.c -o test
