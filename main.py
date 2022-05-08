@@ -4,22 +4,26 @@ from random import randint
 from typing import Optional
 import os
 import io
-from fastapi import FastAPI
 import json
-
 import sys
 from subprocess import Popen, PIPE
 
+from fastapi import FastAPI
 
-app = FastAPI()
-
-"""Constants"""
+from docs.openapi import SchemaBuilder
 
 
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
+app = FastAPI(
+    title = "VananeAPI",
+    description = """
+        Vanane API
+        """,
+    version = "0.5"
+)
 
+schema = SchemaBuilder(app)
+
+app.openapi = schema.build
 
 
 @app.get("/dice2/{expr}")
@@ -31,10 +35,9 @@ async def parse_dices(expr: str):
 
     for line in iter(diceProcess.stdout.readline, b''):
         result += line.decode('ISO-8859-1')        
-    print(result + "\n\n")
 
     command = json.loads(result)
-        
+
     if(type(command) == list):
         return command
 
@@ -46,9 +49,8 @@ async def parse_dices(expr: str):
         result = makeError(e)
     return result
 
-#region Dice parsing 
-#endregion
 
+#region Dice parsing 
 
 def makeMult(command):
     result = []
@@ -100,3 +102,6 @@ def makeError(message):
 def checkErrors(command):
     if(type(command) is list): # The format of the error output of the dice parser is a JSON array, or list in Python
         return makeError(command[0]["value"])
+
+#endregion
+
