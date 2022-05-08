@@ -4,10 +4,19 @@
 
 ### Prerequisites
 
--   [Make](https://www.gnu.org/software/make/)
--   [GCC](https://www.gnu.org/software/gcc/)
+For the server :
+
 -   [Python 3](https://www.python.org/download/releases/3.0/)
 -   [Uvicorn](https://www.uvicorn.org/)
+-   [FastAPI](https://fastapi.tiangolo.com/)
+
+For the dice parser :
+
+-   [Make](https://www.gnu.org/software/make/)
+-   [GCC](https://www.gnu.org/software/gcc/)
+-   [Bison](https://www.gnu.org/software/bison/)
+-   [Flex](https://github.com/westes/flex)
+
 -   [A server](https://www.google.com/search?q=vps) (no way !)
 
 ### How to install
