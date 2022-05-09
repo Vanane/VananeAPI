@@ -9,6 +9,7 @@ import sys
 from subprocess import Popen, PIPE
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from docs.openapi import SchemaBuilder
 
@@ -25,6 +26,9 @@ schema = SchemaBuilder(app)
 
 app.openapi = schema.build
 
+@app.get("/")
+async def home():
+    return RedirectResponse("/docs")
 
 @app.get("/dice2/{expr}")
 async def parse_dices(expr: str):
