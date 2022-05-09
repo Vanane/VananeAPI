@@ -8,7 +8,7 @@ class SchemaBuilder:
     
     def build(self):
         DOCS_TITLE = "Vanane API"
-        DOCS_VERSION = "0.1"
+        DOCS_VERSION = "1.0"
         openapi_schema = get_openapi(
             title=DOCS_TITLE,
             version=DOCS_VERSION,
@@ -18,12 +18,10 @@ class SchemaBuilder:
         openapi_schema["info"] = {
             "title" : DOCS_TITLE,
             "version" : DOCS_VERSION,
-            "description" : "Learn about programming language history!",
-            "termsOfService": "http://programming-languages.com/terms/",
+            "description" : "Vanane's API",
             "contact": {
-            "name": "Get Help with this API",
-            "url": "http://www.programming-languages.com/help",
-            "email": "support@programming-languages.com"
+            "name": "Source code",
+            "url": "https://github.com/Vanane/VananeAPI"
             },
             "license": {
             "name": "Apache 2.0",
