@@ -7,7 +7,8 @@ from .item import Item
 DEFAULT_FORMAT_FILE = "format"
 ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-class ItemGenerator:
+
+class ItemGenerator:    
     words:dict
     relPath:str
     formatFile:str
@@ -66,16 +67,34 @@ class ItemGenerator:
             return "error"
 
 
+    # Returns a string chosen randomly between the given possibilities
+    #Parses tokens of the form :
+    # {%choose <elem1> <elem2> ...%}
+    # Ex : {%choose a bb ccc dddd%} will choose one of the 4 possibilities
+    def parseChoose(self, token:list) -> str:
+        try:
+            return token[random.choice(range(1, len(token) + 1))]
+        except Exception as e:
+            print("ERROR : " + str(e))
+            print(token)
+            return "error"
+            
+
     # An expression is a calculated token instead of a line randomly picked in a file.
     # It has the following forms :
     # {%randint 0 10%} will generate a random number between 0 and 10
     # {%randstr 65 80 3%} will generate a random string of size 3 composed of characters between A and Z
     def parseExpression(self, expr: str) -> str:
+        expressions = {
+            "randint":self.parseRandInt,
+            "randstr":self.parseRandStr,
+            "choose":self.parseChoose
+        }
+
         token = expr.split(' ')
-        if token[0] == "randint":
-            return self.parseRandInt(token)
-        elif token[0] == "randstr":
-            return self.parseRandStr(token)
+
+        if token[0] in expressions:
+            return expressions[token[0]](token)
         else:
             return ""
 

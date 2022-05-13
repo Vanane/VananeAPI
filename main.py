@@ -1,6 +1,7 @@
 from array import array
 from multiprocessing.dummy import Array
 from random import randint
+import random
 from typing import Optional
 import os
 import io
@@ -61,7 +62,10 @@ async def parse_dices(expr: str):
 
 
 @app.get("/item")
-async def get_item(howMany: int):
+async def get_item(howMany: Optional[int] = 1, seed: Optional[int] = None):
+    if seed is None:
+        seed = random.randint(-sys.maxsize, sys.maxsize)
+    random.seed(seed)
     howMany = min(10, howMany)
     ret = [None] * howMany
     for i in range(0, howMany):
