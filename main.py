@@ -12,8 +12,9 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from docs.openapi import SchemaBuilder
+from api.item.itemGenerator import ItemGenerator
 
-
+# Create FastAPI app
 app = FastAPI(
     title = "VananeAPI",
     description = """
@@ -22,13 +23,18 @@ app = FastAPI(
     version = "0.5"
 )
 
+# Define the docs of the API with OpenAPI
 schema = SchemaBuilder(app)
-
 app.openapi = schema.build
+
+# Initialize modules of the API
+itemGenerator = ItemGenerator("api/item/data", "itemFormat")
+
 
 @app.get("/")
 async def home():
     return RedirectResponse("/docs")
+
 
 @app.get("/dice2/{expr}")
 async def parse_dices(expr: str):
@@ -52,6 +58,16 @@ async def parse_dices(expr: str):
         print("Caught error : " + e)
         result = makeError(e)
     return result
+
+
+@app.get("/item")
+async def get_item():
+    ret = [None] * 10
+    for i in range(0, 10):
+        ret[i] = itemGenerator.getItem()
+    return ret
+
+
 
 
 #region Dice parsing 
