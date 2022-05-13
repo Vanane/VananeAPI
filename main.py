@@ -64,25 +64,17 @@ async def parse_dices(expr: str):
 
 
 @app.get("/item")
-async def get_item(response:Response, howMany: Optional[int] = 1, seed: Optional[int] = None):
+async def get_item(howMany: Optional[int] = 1, seed: Optional[int] = None):
     if seed is None:
         seed = random.randint(-sys.maxsize, sys.maxsize)
     random.seed(seed)
     howMany = min(10, howMany)
     ret = [None] * howMany
+    
     for i in range(0, howMany):
         ret[i] = itemGenerator.getItem()
-    
-    response.headers["Content-Type"] = "application/ld+json"
 
-    return {
-        "@context":"https://schema.org",
-        "@type":"Product",
-        "description":"Unisex Facebook T-shirt, Small",
-        "url":"https://example.org/facebook",
-        "image":"https://example.org/facebook.jpg",
-        "items":ret
-    }
+    return ret
 
 
 
