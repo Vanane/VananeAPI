@@ -28,7 +28,7 @@ schema = SchemaBuilder(app)
 app.openapi = schema.build
 
 # Initialize modules of the API
-itemGenerator = ItemGenerator("api/item/data", "itemFormat")
+itemGenerator = ItemGenerator("api/item/data", "format")
 
 
 @app.get("/")
@@ -44,7 +44,7 @@ async def parse_dices(expr: str):
     result = ""
 
     for line in iter(diceProcess.stdout.readline, b''):
-        result += line.decode('ISO-8859-1')        
+        result += line.decode('ISO-8859-1')
 
     command = json.loads(result)
 
@@ -61,12 +61,12 @@ async def parse_dices(expr: str):
 
 
 @app.get("/item")
-async def get_item():
-    ret = [None] * 10
-    for i in range(0, 10):
+async def get_item(howMany: int):
+    howMany = min(10, howMany)
+    ret = [None] * howMany
+    for i in range(0, howMany):
         ret[i] = itemGenerator.getItem()
     return ret
-
 
 
 
