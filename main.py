@@ -8,9 +8,11 @@ import io
 import json
 import sys
 from subprocess import Popen, PIPE
+from urllib import response
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.responses import RedirectResponse
+from fastapi.responses import ORJSONResponse
 
 from docs.openapi import SchemaBuilder
 from api.item.itemGenerator import ItemGenerator
@@ -62,7 +64,7 @@ async def parse_dices(expr: str):
 
 
 @app.get("/item")
-async def get_item(howMany: Optional[int] = 1, seed: Optional[int] = None):
+async def get_item(response:Response, howMany: Optional[int] = 1, seed: Optional[int] = None):
     if seed is None:
         seed = random.randint(-sys.maxsize, sys.maxsize)
     random.seed(seed)
@@ -70,7 +72,12 @@ async def get_item(howMany: Optional[int] = 1, seed: Optional[int] = None):
     ret = [None] * howMany
     for i in range(0, howMany):
         ret[i] = itemGenerator.getItem()
+    
+    response.headers["Content-Type"] = "application/ld+json"
+
     return {
+        "@context":"https://schema.org",
+        "@type":"Product",
         "description":"Unisex Facebook T-shirt, Small",
         "url":"https://example.org/facebook",
         "image":"https://example.org/facebook.jpg",
