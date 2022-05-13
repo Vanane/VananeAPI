@@ -70,7 +70,12 @@ async def get_item(howMany: Optional[int] = 1, seed: Optional[int] = None):
     ret = [None] * howMany
     for i in range(0, howMany):
         ret[i] = itemGenerator.getItem()
-    return ret
+    return {
+        "description":"Unisex Facebook T-shirt, Small",
+        "url":"https://example.org/facebook",
+        "image":"https://example.org/facebook.jpg",
+        "items":ret
+    }
 
 
 
