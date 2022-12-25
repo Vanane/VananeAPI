@@ -15,13 +15,6 @@ class SchemaBuilder:
             routes=self.app.routes,
         )
 
-        # Remove auto-generated default docs
-        # Remove the autodoc for / endpoint
-        openapi_schema["paths"].pop("/")
-        # Remove the autodoc for schemas
-        openapi_schema["components"]["schemas"].pop("HTTPValidationError")
-        openapi_schema["components"]["schemas"].pop("ValidationError")
-
         openapi_schema["info"] = {
             "title" : DOCS_TITLE,
             "version" : DOCS_VERSION,
@@ -77,6 +70,31 @@ class SchemaBuilder:
         }
 
 
+        openapi_schema["paths"]["/item"]["get"]["summary"] = "Item generator"
+        openapi_schema["paths"]["/item"]["get"]["description"] = ""
+
+        # Change the response formats for /item endpoint
+        openapi_schema["paths"]["/item"]["get"]["responses"] = {
+            "200": {
+                "content": {
+                    "application/json": {
+                        "example": [{
+                                "name": "Mediocre Comically-large Espadon",
+                                "modifiers": {
+                                "Mediocre": "-50% stat multiplier",
+                                "Comically-large": "Hilarously huge",
+                                "Espadon": "2d8 of Slash damage"
+                                }
+                         }],
+                        "schema": {
+                            "$ref":"#/components/schemas/Item"
+                        }
+                    }
+                }
+            }
+        }
+
+        # Schema for a dice result
         openapi_schema["components"]["schemas"]["DiceResult"] = {
             "title":"DiceResult",
             "type": "array",
@@ -87,6 +105,22 @@ class SchemaBuilder:
                 ]
             }
         }
+
+        # Schema for an item
+        openapi_schema["components"]["schemas"]["Item"] = {
+            "title":"Item",
+            "type": "object",
+            "properties": {
+                "name":{ "type":"string" },
+                "modifiers": {
+                    "type":"object",
+                    "properties": {
+                        "ModifierName":{ "type":"string" }
+                    }
+                },
+            }
+        }
+
  
 
         self.app.openapi_schema = openapi_schema
