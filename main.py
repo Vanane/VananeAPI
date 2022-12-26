@@ -129,7 +129,7 @@ async def post_auth(body:PostAuth):
         user = User.getUser(body.username)
         ret = JWTManager.getJWTForUser(user)
     else:
-        return JSONResponse(status_code=401, content = Message("Invalid credentials. This event will be logged."))
+        return JSONResponse(status_code=401, content = { "message":"Invalid credentials. This event will be logged." })
     return JSONResponse(status_code=200, content=ret)
 
 
