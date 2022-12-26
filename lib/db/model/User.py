@@ -1,12 +1,15 @@
+import hashlib
+
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import Text
-
+from sqlalchemy import PickleType
 from sqlalchemy import select
 
 from ..DbManager import DbManager
 
-import hashlib
+from ...util.TextPickleType import TextPickleType
+
 
 
 class User(DbManager.Base):
@@ -14,7 +17,7 @@ class User(DbManager.Base):
 
     username = Column(Text, primary_key=True)
     password = Column(Text, nullable=False)
-    permissions = Column(Text, nullable=False) # JSON array of strings 
+    permissions = Column(TextPickleType(), nullable=False) # JSON array of strings 
     active = Column(Integer, default=0)
 
 
@@ -23,8 +26,7 @@ class User(DbManager.Base):
         ret = None
         s = DbManager().getSession()
         ret = s.scalar(query)
-        s.commit()
-        print(ret)
+
         return ret
 
 
@@ -32,7 +34,7 @@ class User(DbManager.Base):
         s = DbManager().getSession()
         pa = User.encryptPassword(pa)
         
-        ret = s.add(User(username=us, password = pa, permissions = str(pe), active = ac))
+        ret = s.add(User(username=us, password = pa, permissions = pe, active = ac))
         s.commit()
         return ret
 
@@ -61,6 +63,3 @@ class User(DbManager.Base):
                 ', permissions=' + self.permissions +\
                 ', active=' + str(self.active) +\
                 ')'
-
-
-

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
-class PostAuthBody(BaseModel):
+class PostAuth(BaseModel):
     username:str
     password:str

@@ -13,8 +13,12 @@ class DbManager(Singleton):
     session = None
 
     Base = declarative_base()
-    Base.to_dict = lambda a:dict((col, getattr(a, col)) for col in a.__table__.columns.keys()) # Lambda function to convert any ORM object to a JSON-convertible dictionary
 
+    """
+    Lambda function to convert any ORM object to a JSON-convertible dictionary
+    """
+    Base.toDict = lambda object:dict((col, getattr(object, col)) for col in object.__table__.columns.keys())
+    
 
     def __init__(self):
         if self.engine is None:

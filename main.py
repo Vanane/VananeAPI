@@ -11,25 +11,31 @@ from subprocess import Popen, PIPE
 from urllib import response
 
 # Configuration loader
-import config
+from config import config
 
 # FastAPI imports
 from fastapi import FastAPI, Response, HTTPException
-from fastapi.responses import RedirectResponse, ORJSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 
 # For docs
 from docs.openapi import SchemaBuilder
 
 # Body models fot POST requests
-from api.body.PostJWT import PostJWT
-from api.body.PostAuthBody import PostAuthBody
+from api.body.JWT import PostJWT
+from api.body.Auth import PostAuth
+from api.body.Vananment import *
+
+# Response models, for autodoc
+from api.response.Message import Message
 
 from lib.db.DbManager import DbManager
 from lib.auth.JWTManager import JWTManager
+from lib.auth.PermManager import PermManager
 
 # Business classes
 from api.item.itemGenerator import ItemGenerator
 from lib.db.model.User import User
+from lib.db.model.Vananment import Vananment
 
 
 # Create FastAPI app
@@ -52,13 +58,13 @@ app.openapi = schema.build
 def initApp():
     # Init database manager
     first = False
-    if not os.path.exists(config.config["Database"]["DB_PATH"]):
+    if not os.path.exists(config["Database"]["DB_PATH"]):
         first = True
     
     DbManager()
     
     if first:
-        User.createUser(config.config["First User"]["USERNAME"], config.config["First User"]["PASSWORD"], ['ALL'], 1)
+        User.createUser(config["First User"]["USERNAME"], config["First User"]["PASSWORD"], [PermManager.adminPermission], 1)
 
 #endregion
 
@@ -67,9 +73,9 @@ def initApp():
 itemGenerator = ItemGenerator("api/item/data", "format")
 initApp()
 
-# region Endpoints
+#region Endpoints
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def home():
     return RedirectResponse("/docs")
 
@@ -113,33 +119,95 @@ async def get_item(howMany: Optional[int] = 1, seed: Optional[int] = None):
 
 #region Vanane.net API
 
-@app.post("/443/permissions")
-async def post_permissions(body:PostJWT):
-    if not JWTManager.checkJWT(body.jwt):
-        raise HTTPException(status_code=403, detail="Invalid token, check /433/auth for more informations.")
-
-
 
 @app.post("/443/auth")
-async def post_auth(body:PostAuthBody):
+async def post_auth(body:PostAuth):
     fail = False
     ret = None 
     
     if User.checkPassword(body.username, body.password):
         user = User.getUser(body.username)
-        if user is not None:
-            ret = JWTManager.getJWTForUser(user, duration=60)
-        else:
-            fail = True
+        ret = JWTManager.getJWTForUser(user)
     else:
-        fail = True
-    if fail:
-        raise HTTPException(status_code=403, detail="Invalid credentials. This event will be logged.")
-    return ret
+        return JSONResponse(status_code=401, content = Message("Invalid credentials. This event will be logged."))
+    return JSONResponse(status_code=200, content=ret)
+
+
+@app.post("/443/permissions")
+async def post_permissions(body:PostJWT):
+    errorResponse = validateJWTAndPermissions(body.jwt, {})
+    if errorResponse is not None:
+        return errorResponse
+    
+
+    
+
+@app.get("/443/test")
+async def get_test():
+
+    pass
+
+
+#region Vananments
+
+@app.get("/443/vananment")
+async def get_vananments():
+    res = Vananment.gets()
+    return list(map(lambda x: x.toDict(), res))
+
+
+@app.put("/443/vananment")
+async def add_vananment(body:PutVananment):
+    errorResponse = validateJWTAndPermissions(body.jwt, {"PutVananment"})
+    if errorResponse is not None:
+        return errorResponse
+    return Vananment.add(body.content)
+
+
+@app.post("/443/vananment")
+async def modify_vananment(body:PostVananment):
+    errorResponse = validateJWTAndPermissions(body.jwt, {"PostVananment"})
+    if errorResponse is not None:
+        return errorResponse
+
+    vananment = Vananment.get(body.id)
+    if vananment is None:
+        return JSONResponse(status_code = 404, content = { "message" : "Vananment not found." })
+    vananment.update(content = body.content)
+
+
+
+@app.delete("/443/vananment")
+async def delete_vananment(body:DeleteVananment):
+    errorResponse = validateJWTAndPermissions(body.jwt, {"DeleteVananment"})
+    if errorResponse is not None:
+        return errorResponse
+
+    vananment = Vananment.get(body.id)
+    if vananment is None:
+        return JSONResponse(status_code = 404, content = { "message" : "Vananment not found." })
+
+    vananment.delete()
+    
 
 #endregion
 
 #endregion
+
+#endregion
+
+#region Functions
+
+def validateJWTAndPermissions(pJwt, perms:set):
+    """
+    If JWT is valid and user has the given permissions, returns None. Otherwise, returns a JSONResponse that can be returned to directly respond to the request.
+    """
+    decoded = JWTManager.validateAndDecodeJWT(pJwt)
+    if decoded is None:
+        return JSONResponse(status_code=401, content = {"message":"Invalid token, check /433/auth for more informations."})
+    print((decoded))
+    if not PermManager.hasPermissions(User.getUser(decoded['iss']), perms):
+        return JSONResponse(status_code=403, content = {"message":"You are missing the following rights : " + str(perms)})
 
 #region Dice parsing 
 
@@ -193,5 +261,7 @@ def makeError(message):
 def checkErrors(command):
     if(type(command) is list): # The format of the error output of the dice parser is a JSON array, or list in Python
         return makeError(command[0]["value"])
+
+#endregion
 
 #endregion

@@ -13,7 +13,7 @@ class SchemaBuilder:
             title=DOCS_TITLE,
             version=DOCS_VERSION,
             routes=self.app.routes,
-        )
+        )        
 
         openapi_schema["info"] = {
             "title" : DOCS_TITLE,
@@ -29,15 +29,17 @@ class SchemaBuilder:
             },            
         }
 
-
+#region Endpoints
         # Change the description for /dice2/{expr} endpoint
-        openapi_schema["paths"]["/dice2/{expr}"]["get"]["summary"] = "Simple dice parser that accept several formats, and returns arrays of results"
+        openapi_schema["paths"]["/dice2/{expr}"]["get"]["summary"] = "Simple dice parser"
         openapi_schema["paths"]["/dice2/{expr}"]["get"]["description"] =\
-            "Launches dices or series of dices\nAccepted formats :\
+            "Launches dices or series of dices\
+            \nAccepted formats :\
             \n- *dice* : [0-9]+ d [0-9]+\
             \n- *dice with bonus* : *dice* +|- [0-9]+\
             \n- *expr* : [0-9]+ ( *expr* )\
-            "
+            \n\
+            \n\n**There are no spaces in the expressions, visible spaces are only for readability.**"
         # Change the response formats for /dice2/{expr} endpoint
         openapi_schema["paths"]["/dice2/{expr}"]["get"]["responses"] = {
             "200": {
@@ -94,6 +96,21 @@ class SchemaBuilder:
             }
         }
 
+
+        openapi_schema["paths"]["/443/auth"]["post"]["summary"] = "Authentication portal"
+        openapi_schema["paths"]["/443/auth"]["post"]["description"] =\
+            "Provides a temporary JWT, mandatory to use\
+            any other endpoint from the 443 category."
+
+
+        openapi_schema["paths"]["/443/permissions"]["post"]["summary"] = "Permission check"
+        openapi_schema["paths"]["/443/permissions"]["post"]["description"] =\
+            "Returns a list of all the commands you can or cannot use through the API."
+
+#endregion
+        
+#region Schemas
+
         # Schema for a dice result
         openapi_schema["components"]["schemas"]["DiceResult"] = {
             "title":"DiceResult",
@@ -121,6 +138,7 @@ class SchemaBuilder:
             }
         }
 
+#endregion
  
 
         self.app.openapi_schema = openapi_schema

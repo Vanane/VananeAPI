@@ -12,7 +12,9 @@ class JWTManager(Singleton):
 
 
     def getJWTForUser(user:User, duration=3600):
-
+        """
+        Returns a token for a given username. If a token was generated in the last *duration* seconds, then the cached token is returned instead.
+        """
         generateJwt = lambda user, time: jwt.encode({
                     "iss":user.username,
                     "exp":time
@@ -26,8 +28,8 @@ class JWTManager(Singleton):
         userKey = JWTManager.activeKeys.get(user.username, None)
 
         if userKey is not None:
-            if JWTManager.checkJWT(userKey):
-                ret = userKey
+            if JWTManager.validateAndDecodeJWT(userKey):
+                return userKey
         if ret is None:
             ret = generateJwt(user, offsetTime)
             JWTManager.activeKeys[user.username] = ret
@@ -35,9 +37,11 @@ class JWTManager(Singleton):
         return ret
 
 
-    def checkJWT(key:str):
+    def validateAndDecodeJWT(key:str):
+        """
+        # Checks the validity of a JWT, and returns the decoded JWT if valid, or None otherwise
+        """
         try:
-            jwt.decode(key, key=config["Settings"]["JWT_PASSPHRASE"], algorithms=["HS512"], options={'verify_exp':True})
+            return jwt.decode(key, key=config["Settings"]["JWT_PASSPHRASE"], algorithms=["HS512"], options={'verify_exp':True})
         except (jwt.ExpiredSignatureError, jwt.DecodeError):
-            return False
-        return True
+            return None
