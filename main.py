@@ -16,6 +16,7 @@ from config import config
 # FastAPI imports
 from fastapi import FastAPI, Response, HTTPException
 from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 # For docs
 from docs.openapi import SchemaBuilder
@@ -45,6 +46,14 @@ app = FastAPI(
         Vanane API
         """,
     version = "0.5"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
 )
 
 
